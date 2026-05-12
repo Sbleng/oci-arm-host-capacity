@@ -14,35 +14,30 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.1'
 
       - name: Install dependencies
         run: composer install --no-progress --no-dev
 
-      - name: Write OCI private key to file
+      - name: Write private key to file
         run: |
-          echo "$OCI_PRIVATE_KEY" > /tmp/oci_private_key.pem
-          chmod 600 /tmp/oci_private_key.pem
-        env:
-          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          echo "${{ secrets.OCI_PRIVATE_KEY }}" > /tmp/private_key.pem
+          chmod 600 /tmp/private_key.pem
 
-      - name: Run OCI script
+      - name: Run script
         env:
-          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_PRIVATE_KEY_FILENAME: /tmp/oci_private_key.pem
+          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
+          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_PRIVATE_KEY_FILENAME: /tmp/private_key.pem
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
-          OCI_SHAPE: "VM.Standard.A1.Flex"
           OCI_OCPUS: "4"
           OCI_MEMORY_IN_GBS: "24"
-          OCI_OPERATING_SYSTEM: "Canonical Ubuntu"
-          OCI_OPERATING_SYSTEM_VERSION: "22.04"
-          OCI_DISPLAY_NAME: "IOX-NEXUS"
-          OCI_BOOT_VOLUME_SIZE_IN_GBS: "200"
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_SHAPE: "VM.Standard.A1.Flex"
           OCI_MAX_INSTANCES: "1"
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
+          OCI_BOOT_VOLUME_SIZE_IN_GBS: "200"
         run: php index.php
