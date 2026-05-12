@@ -9,15 +9,22 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.3'
 
       - name: Install dependencies
-        run: composer install --no-progress
+        run: composer install --no-progress --no-dev
+
+      - name: Write OCI private key to file
+        run: |
+          echo "$OCI_PRIVATE_KEY" > /tmp/oci_private_key.pem
+          chmod 600 /tmp/oci_private_key.pem
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
 
       - name: Run OCI script
         env:
@@ -25,7 +32,7 @@ jobs:
           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
           OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_PRIVATE_KEY_FILENAME: /tmp/oci_private_key.pem
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
           OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
@@ -37,4 +44,5 @@ jobs:
           OCI_DISPLAY_NAME: "IOX-NEXUS"
           OCI_BOOT_VOLUME_SIZE_IN_GBS: "200"
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_MAX_INSTANCES: "1"
         run: php index.php
